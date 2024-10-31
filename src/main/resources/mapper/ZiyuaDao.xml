@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZiyuaDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.laoshi_id as laoshiId
+        ,a.ziyua_name as ziyuaName
+        ,a.ziyua_uuid_number as ziyuaUuidNumber
+        ,a.ziyua_photo as ziyuaPhoto
+        ,a.ziyua_types as ziyuaTypes
+        ,a.ziyua_file as ziyuaFile
+        ,a.ziyua_video as ziyuaVideo
+        ,a.ziyua_content as ziyuaContent
+        ,a.ziyua_delete as ziyuaDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZiyuaView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,laoshi.laoshi_uuid_number as laoshiUuidNumber
+        ,laoshi.laoshi_name as laoshiName
+        ,laoshi.laoshi_phone as laoshiPhone
+        ,laoshi.laoshi_id_number as laoshiIdNumber
+        ,laoshi.laoshi_photo as laoshiPhoto
+        ,laoshi.laoshi_email as laoshiEmail
+
+        FROM ziyua  a
+        left JOIN laoshi laoshi ON a.laoshi_id = laoshi.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.laoshiId != null and params.laoshiId != ''">
+                and (
+                    a.laoshi_id = #{params.laoshiId}
+                )
+            </if>
+            <if test=" params.ziyuaName != '' and params.ziyuaName != null and params.ziyuaName != 'null' ">
+                and a.ziyua_name like CONCAT('%',#{params.ziyuaName},'%')
+            </if>
+            <if test=" params.ziyuaUuidNumber != '' and params.ziyuaUuidNumber != null and params.ziyuaUuidNumber != 'null' ">
+                and a.ziyua_uuid_number like CONCAT('%',#{params.ziyuaUuidNumber},'%')
+            </if>
+            <if test="params.ziyuaTypes != null and params.ziyuaTypes != ''">
+                and a.ziyua_types = #{params.ziyuaTypes}
+            </if>
+            <if test=" params.ziyuaVideo != '' and params.ziyuaVideo != null and params.ziyuaVideo != 'null' ">
+                and a.ziyua_video like CONCAT('%',#{params.ziyuaVideo},'%')
+            </if>
+            <if test=" params.ziyuaContent != '' and params.ziyuaContent != null and params.ziyuaContent != 'null' ">
+                and a.ziyua_content like CONCAT('%',#{params.ziyuaContent},'%')
+            </if>
+            <if test="params.ziyuaDeleteStart != null and params.ziyuaDeleteStart != ''">
+                <![CDATA[  and a.ziyua_delete >= #{params.ziyuaDeleteStart}   ]]>
+            </if>
+            <if test="params.ziyuaDeleteEnd != null and params.ziyuaDeleteEnd != ''">
+                <![CDATA[  and a.ziyua_delete <= #{params.ziyuaDeleteEnd}   ]]>
+            </if>
+             <if test="params.ziyuaDelete != null and params.ziyuaDelete != ''">
+                and a.ziyua_delete = #{params.ziyuaDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+
+                <!-- 判断老师的id不为空 -->
+            <if test=" params.laoshiIdNotNull != '' and params.laoshiIdNotNull != null and params.laoshiIdNotNull != 'null' ">
+                and a.laoshi_id IS NOT NULL
+            </if>
+            <if test=" params.laoshiUuidNumber != '' and params.laoshiUuidNumber != null and params.laoshiUuidNumber != 'null' ">
+                and laoshi.laoshi_uuid_number like CONCAT('%',#{params.laoshiUuidNumber},'%')
+            </if>
+            <if test=" params.laoshiName != '' and params.laoshiName != null and params.laoshiName != 'null' ">
+                and laoshi.laoshi_name like CONCAT('%',#{params.laoshiName},'%')
+            </if>
+            <if test=" params.laoshiPhone != '' and params.laoshiPhone != null and params.laoshiPhone != 'null' ">
+                and laoshi.laoshi_phone like CONCAT('%',#{params.laoshiPhone},'%')
+            </if>
+            <if test=" params.laoshiIdNumber != '' and params.laoshiIdNumber != null and params.laoshiIdNumber != 'null' ">
+                and laoshi.laoshi_id_number like CONCAT('%',#{params.laoshiIdNumber},'%')
+            </if>
+            <if test=" params.laoshiEmail != '' and params.laoshiEmail != null and params.laoshiEmail != 'null' ">
+                and laoshi.laoshi_email like CONCAT('%',#{params.laoshiEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
